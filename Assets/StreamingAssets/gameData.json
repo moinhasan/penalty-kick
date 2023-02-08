@@ -1,0 +1,20 @@
+{
+    "levelData": {
+        "goalPoint": 1,
+        "shots": 5,
+        "minTargets": 3,
+        "maxTargets": 8,
+        "minTargetPoints": 2,
+        "maxTargetPoints": 5
+    },
+    "playerData": {
+        "id": 30049,
+        "level": 2,
+        "xp": 210,
+        "skill": {
+            "speed": 6,
+            "accuracy": 0,
+            "curve": 10
+        }
+    }
+}
