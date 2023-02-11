@@ -1,50 +1,72 @@
 ﻿using UnityEngine;
 using System.Collections;
+using DG.Tweening;
 
 ///<summary>
-///Control camera movement
+/// Automatic control camera movement to show the close up shot
 ///</summary>
 public class CameraController : MonoBehaviour {
-	private Vector3 target = Vector3.zero;   //the target to lock on to
-	private float speed = 1.0f; //to control the rotation 
-	private bool smooth = true;
+	private Transform _camTransform;
+	private Vector3 _camPosition; // Default camera position
+	private Vector3 _movePosition; // The position to move to when shot in progress
+	private Vector3 _target = Vector3.zero; // The target to lock on to
+	private float _duration = 1.0f; // Movement duration
+	private bool _smooth = true; // Smooth transition
 
-	private ShotController shotController;
-	private Transform _myTransform;
-	
 	void Awake() {
-		_myTransform = transform;
+		GameManager.OnShotUpdate += AdjustCameraAction;
+		GameManager.OnGameRestart += ResetCamera;
+
+		_camTransform = transform;
+		_camPosition = transform.position;		
 	}
 
-    private void Start()
+	/// <summary>
+	/// Adjust camera movement and target based on current shot state 
+	/// </summary>
+	/// <param name="shot"></param>
+	void AdjustCameraAction(Shot shot)
+	{
+		// When shot starts, get closeup of the shot
+		if (shot.CurrentState == Shot.State.Start)
+		{
+			_smooth = true;
+			_target = shot.Target;
+			_movePosition = new Vector3(_camPosition.x, _camPosition.y, -10.0f);
+		}
+		// Set default position and target when shot ends 
+		else if (shot.CurrentState == Shot.State.End)
+		{
+			_smooth = false;
+			_target = Vector3.zero;
+			_movePosition = _camPosition;
+		}
+
+		if (_smooth) SmoothLookAt();
+		else LookAt();
+	}
+
+	void ResetCamera() {
+		_target = Vector3.zero;
+		_movePosition = _camPosition;
+		LookAt();
+	}
+
+	/// <summary>
+	/// Smoothly look at the target and move to position
+	/// </summary>
+	private void SmoothLookAt()
     {
-		shotController = ShotController.instance;
+		_camTransform.DOLookAt(_target, _duration).SetUpdate(true);
+		_camTransform.DOMove(_movePosition, _duration).SetUpdate(true);
 	}
 
-	void LateUpdate() {
-		if (shotController.currentShot == null)
-        {
-			return;
-		} 
-		else if (shotController.currentShot.CurrentState == Shot.State.proceed) {
-			smooth = true;
-			target = shotController.currentShot.Target;
-		}
-        else
-        {
-			smooth = true;
-			target = Vector3.zero;
-		}
-
-		if(smooth) {
-				
-			//Look at and limit the rotation
-			Quaternion rotation = Quaternion.LookRotation(target - _myTransform.position);
-			_myTransform.rotation = Quaternion.Slerp(_myTransform.rotation, rotation, Time.deltaTime * speed);
-		}
-		else { //Just look at
-			_myTransform.rotation = Quaternion.LookRotation(target - _myTransform.position);
-			//_myTransform.rotation = Quaternion.FromToRotation(-Vector3.forward, (new Vector3(target.x, target.y, target.z) - _myTransform.position).normalized);				
-		}	
+	/// <summary>
+	/// Just look at the target
+	/// </summary>
+	private void LookAt()
+	{
+		_camTransform.position = _movePosition;
+		_camTransform.LookAt(_target);
 	}
 }

@@ -3,11 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum GameState
-{
-
-}
-
 public class GameManager : MonoBehaviour
 {
     public static event Action OnGameInitialization;
@@ -15,8 +10,12 @@ public class GameManager : MonoBehaviour
     public static event Action OnGamePause;
     public static event Action OnGameResume;
     public static event Action OnGameRestart;
-    public static event Action OnGameOver;
+    public static event Action<int> OnGameOver;
 
+    // In-Game Manager
+
+    private int _score;
+    public static event Action<Shot> OnShotUpdate;
     public static event Action OnGoalScored;
     public static event Action<int> OnTargetHit;
 
@@ -58,9 +57,10 @@ public class GameManager : MonoBehaviour
         OnGameStart?.Invoke();
     }
 
-    public void EndGame(int score)
+    public void EndGame()
     {
-        OnGameOver?.Invoke();
+        OnGameOver?.Invoke(_score);
+        _score = 0;
     }
 
     public void PauseGame()
@@ -79,7 +79,21 @@ public class GameManager : MonoBehaviour
         OnGameRestart?.Invoke();
     }
 
-    // In Game Manager
+    // In-Game Manager
+
+    public void ShotUpdate(Shot shot)
+    {
+        OnShotUpdate?.Invoke(shot);
+
+        if (shot.CurrentState == Shot.State.Result)
+        {
+            if (shot.IsSuccess)
+            {
+                _score += shot.Score;
+            }
+        }
+    }
+
     public void GoalScored()
     {
         OnGoalScored?.Invoke();

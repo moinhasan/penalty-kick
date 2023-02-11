@@ -13,9 +13,9 @@ public class TargetSpawner : MonoBehaviour
 
     void Awake()
     {
-        GameManager.OnGameStart += SpawnTargets; // Spawn Targets on Game Start
+        GameManager.OnGameStart += OnStartGame; 
         GameManager.OnGameRestart += OnRestartGame;
-        GameManager.OnGameOver += ClearTargets; // Clear all Targets on Game Over
+        GameManager.OnGameOver += OnGameOver; 
     }
 
     // Start is called before the first frame update
@@ -24,9 +24,10 @@ public class TargetSpawner : MonoBehaviour
         targets = new List<GameObject>(); // Target object list
     }
 
+    // Spawn Targets on Game Start
     void OnStartGame()
     {
-        
+        SpawnTargets();
     }
 
     /// <summary>
@@ -38,9 +39,10 @@ public class TargetSpawner : MonoBehaviour
         SpawnTargets();
     }
 
-    void OnGameOver()
+    // Clear all Targets on Game Over
+    void OnGameOver(int score)
     {
-        
+        ClearTargets();
     }
 
     /// <summary>

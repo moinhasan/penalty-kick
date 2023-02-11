@@ -12,7 +12,7 @@ public class CursorTrail : MonoBehaviour
  
     private void Update()
     {
-        if (ShotController.instance.IsTouchEnable)
+        if (ShotController.Instance.IsTouchEnable)
         {
             if (Input.GetMouseButtonDown(0))
             {

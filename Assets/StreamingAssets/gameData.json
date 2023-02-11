@@ -13,8 +13,8 @@
         "xp": 210,
         "skill": {
             "speed": 6,
-            "accuracy": 0,
-            "curve": 10
+            "accuracy": 8,
+            "curve": 8
         }
     }
 }

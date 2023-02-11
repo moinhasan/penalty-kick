@@ -7,17 +7,18 @@ using DG.Tweening;
 
 public delegate void GoalSuccessEvent();
 
-public class ScoreManager : MonoBehaviour //HUD Manager
+public class HUDManager : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI scoreText;
+    [SerializeField] private TextMeshProUGUI speedText;
     [SerializeField] private GameObject goalBanner;
 
     private int score;
     private int hit;
     private int miss;
 
-    private static ScoreManager instance = null;
-    public static ScoreManager Instance
+    private static HUDManager instance = null;
+    public static HUDManager Instance
     {
         get
         {
@@ -28,6 +29,7 @@ public class ScoreManager : MonoBehaviour //HUD Manager
     void Awake()
     {
         GameManager.OnGameRestart += Reset;
+        GameManager.OnShotUpdate += OnShotStateUpdate;
 
         if (instance == null)
         {
@@ -39,6 +41,29 @@ public class ScoreManager : MonoBehaviour //HUD Manager
         }
 
         goalBanner.transform.localScale = Vector3.zero;
+        speedText.text = "";
+    }
+
+    private void OnShotStateUpdate(Shot shot)
+    {
+        // When shot starts
+        if (shot.CurrentState == Shot.State.Start)
+        {
+            speedText.text = string.Format("{0} km/h", Mathf.RoundToInt(shot.Speed * 3.6f)); // m/s -> km/h
+        }
+        else if (shot.CurrentState == Shot.State.Ready)
+        {
+            speedText.text = "";
+        }
+
+        if (shot.CurrentState == Shot.State.Result)
+        {
+            if (shot.IsSuccess)
+            {
+                GoalBannerAnimation();
+                IncreaseScore(shot.Score);
+            }
+        }
     }
 
     public void GoalSuccess() {
@@ -52,19 +77,16 @@ public class ScoreManager : MonoBehaviour //HUD Manager
 
     private void Reset()
     {
+        // Reset Speed meter
+        speedText.text = "";
+
+        // Reset Score
         score = 0;
         UpdateScoreDisplay();
+
+        // Reset Goal banner
         tween.Kill();
         goalBanner.transform.localScale = Vector3.zero;
-    }
-
-    public void ProcessResult(Shot shot)
-    {
-        if (shot.IsSuccess)
-        {
-            GoalBannerAnimation();
-            IncreaseScore(shot.Score);
-        }
     }
 
     private void IncreaseScore(int amount)

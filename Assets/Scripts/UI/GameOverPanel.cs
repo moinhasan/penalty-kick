@@ -34,9 +34,9 @@ public class GameOverPanel : PanelViewController
         });
     }
 
-    void OnGameOver()
+    void OnGameOver(int score)
     {
-        //scoreText.text = "Score: " + score;
+        scoreText.text = string.Format("Score: {0}", score);
         if (viewState == ViewState.Hidden) ShowPanel();
     }
 

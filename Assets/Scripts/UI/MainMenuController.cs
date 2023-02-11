@@ -21,24 +21,10 @@ public class MainMenuController : MonoBehaviour
         }
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
     public void StartGame()
     {
-        //ShotController.instance.StartGame();
         GameManager.Instance.StartGame();
         Debug.Log("MainMenu.StartGame");
-    }
-
-    public void GameOver(int score)
-    {
-        Debug.Log("MainMenu.GameOver");
-        //scoreText.text = "Score: " + score;
-        GameManager.Instance.EndGame(score);
     }
 
     public void PauseGame()
@@ -57,22 +43,5 @@ public class MainMenuController : MonoBehaviour
     {
         GameManager.Instance.RestartGame();
         Time.timeScale = 1;
-    }
-
-    public void OnGameOver()
-    {
-        //scoreText.text = "Score: " + score;
-    }
-
-    void OnEnable()
-    {
-        GameManager.OnGameOver += OnGameOver; // register with game over event
-
-    }
-
-    void OnDisable()
-    {
-        GameManager.OnGameOver -= OnGameOver;
-
     }
 }
