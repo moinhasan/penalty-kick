@@ -6,22 +6,22 @@ using UnityEngine;
 
 public class GamePausePanel : PanelViewController
 {
-    [SerializeField] private RectTransform resumeButtonRect;
-    [SerializeField] private RectTransform restartButtonRect;
-    private float animationTime = 0.5f;
+    [SerializeField] private RectTransform _resumeButtonRect;
+    [SerializeField] private RectTransform _restartButtonRect;
+    private float _animationTime = 0.5f;
 
     protected override void Awake()
     {
         base.Awake();
-        resumeButtonRect.transform.localPosition = new Vector3(-1000f, -680f, 0f);
-        restartButtonRect.transform.localPosition = new Vector3(-1000f, -490f, 0f);
+        _resumeButtonRect.transform.localPosition = new Vector3(-1000f, -680f, 0f);
+        _restartButtonRect.transform.localPosition = new Vector3(-1000f, -490f, 0f);
     }
 
     public override void ShowPanel(Action action = null)
     {
         base.ShowPanel(() => {
-            resumeButtonRect.DOAnchorPos(new Vector2(-400f, -680f), animationTime, false).SetEase(Ease.OutElastic).SetUpdate(true);
-            restartButtonRect.DOAnchorPos(new Vector2(-400f, -490f), animationTime, false).SetEase(Ease.OutElastic).SetUpdate(true);
+            _resumeButtonRect.DOAnchorPos(new Vector2(-400f, -680f), _animationTime, false).SetEase(Ease.OutElastic).SetUpdate(true);
+            _restartButtonRect.DOAnchorPos(new Vector2(-400f, -490f), _animationTime, false).SetEase(Ease.OutElastic).SetUpdate(true);
             action?.Invoke();
         });
     }
@@ -29,25 +29,25 @@ public class GamePausePanel : PanelViewController
     public override void HidePanel(Action action = null)
     {
         // SetUpdate sets the update type to UpdateType.Normal and lets you choose if it should be independent from Unity's Time.timeScale
-        resumeButtonRect.DOAnchorPos(new Vector2(-1000f, -680f), animationTime, false).SetEase(Ease.InOutQuint).SetUpdate(true);
-        restartButtonRect.DOAnchorPos(new Vector2(-1000f, -490f), animationTime, false).SetEase(Ease.InOutQuint).SetUpdate(true);
+        _resumeButtonRect.DOAnchorPos(new Vector2(-1000f, -680f), _animationTime, false).SetEase(Ease.InOutQuint).SetUpdate(true);
+        _restartButtonRect.DOAnchorPos(new Vector2(-1000f, -490f), _animationTime, false).SetEase(Ease.InOutQuint).SetUpdate(true);
         base.HidePanel(() => {
             Debug.Log("GamePausePanel.Resume");
             action?.Invoke();
         });
     }
 
-    void OnGamePause()
+    private void OnGamePause()
     {
         if (viewState == ViewState.Hidden) ShowPanel();
     }
 
-    void OnGameResume()
+    private void OnGameResume()
     {
         if (viewState == ViewState.Visible) HidePanel();
     }
 
-    void OnGameRestart()
+    private void OnGameRestart()
     {
         if (viewState == ViewState.Visible) HidePanel();
     }

@@ -7,8 +7,8 @@ using UnityEngine.UI;
 
 public class SimpleButton : MonoBehaviour
 {
-    [SerializeField] private AnimationUIBase animationUI;
-    [SerializeField] private float duration = 0.2f;
+    [SerializeField] private AnimationUIBase _animationUI;
+    [SerializeField] private float _duration = 0.2f;
     private Button _button;
     private Image _buttonImage;
 
@@ -30,6 +30,6 @@ public class SimpleButton : MonoBehaviour
 
     private void OnClick()
     {
-        animationUI.Animate(gameObject, duration);
+        _animationUI.Animate(gameObject, _duration);
     }
 }

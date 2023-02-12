@@ -8,13 +8,13 @@ using UnityEngine.UI;
 [CreateAssetMenu(menuName = "UIAnimation/ Scale", fileName = "ScaleAnim")]
 public class ScaleAnimationUI : AnimationUIBase
 {
-    [SerializeField] private float scaleFactor = 1.2f;
-    [SerializeField] private int loop = 1;
+    [SerializeField] private float _scaleFactor = 1.2f;
+    [SerializeField] private int _loop = 1;
 
     public override void Animate(GameObject gameObj, float duration, Action onCompleteEvent = null)
     {
         var sequence = DOTween.Sequence();
-        var tween = gameObj.transform.DOScale(scaleFactor, duration).SetLoops(loop, LoopType.Yoyo);
+        var tween = gameObj.transform.DOScale(_scaleFactor, duration).SetLoops(_loop, LoopType.Yoyo);
 
         sequence.Append(tween);
 

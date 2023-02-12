@@ -10,6 +10,11 @@ public static class GameDataManager //GameDataProvider
 	public static PlayerData Player { get; private set; }
 	public static LevelData Level { get; private set; }
 
+	/// <summary>
+	/// Load JSON data from Streaming Assets Path and converts to serialized object 
+	/// </summary>
+	/// <param name="OnGameDataLoaded"></param>
+	/// <returns></returns>
 	static IEnumerator LoadDataFromJson(Action OnGameDataLoaded)
 	{
 		string filePath = Path.Combine(Application.streamingAssetsPath + "/", _fileName);
@@ -41,6 +46,10 @@ public static class GameDataManager //GameDataProvider
 		}
 	}
 
+	/// <summary>
+    /// Load game data
+    /// </summary>
+    /// <param name="OnGameDataLoaded"></param>
 	public static void LoadGameData(Action OnGameDataLoaded)
 	{
 		GameManager.Instance.StartCoroutine(LoadDataFromJson(OnGameDataLoaded));

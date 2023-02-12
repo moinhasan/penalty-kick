@@ -5,12 +5,12 @@ using UnityEngine;
 
 public class GameStartPanel : PanelViewController
 {
-    void OnGameStart()
+    private void OnGameStart()
     {
         if(viewState == ViewState.Visible) HidePanel();
     }
 
-    void OnGameInitialization()
+    private void OnGameInitialization()
     {
         if (viewState == ViewState.Hidden) ShowPanel();
     }

@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Controles and executes the shot based on players touch input.
+/// </summary>
 public class ShotController : MonoBehaviour
 {
 	[SerializeField] private GameObject _ballPrefab;
 	[SerializeField] private AnimationCurve _animCurve;
-	[SerializeField] private GameObject dummyPrefab;
 
 	public bool IsTouchEnable { get; private set; } = false; // Is able to use touch gesture to shoot the ball
 
@@ -33,6 +35,20 @@ public class ShotController : MonoBehaviour
 	private float _shotExecutionTime = 5.0f; // Time to execute the shot after input
 
 	private Shot _shot = null; // Shot instance
+
+	// Line (curve) variables  
+	private TouchDirection _previousTouchDirection;
+	private enum TouchDirection // line direction
+	{
+		None,
+		Straight,
+		Left,
+		Right
+	}
+	private List<Vector3> _curvePoints = new List<Vector3>();
+	private Vector3 _curvePeakPoint = Vector3.zero; // last touch point before changing direction
+	private float _curveTriangleLength = 0.0f;
+	private float _curveAngle = 0.0f;
 
 	private static ShotController instance;
 	public static ShotController Instance
@@ -195,13 +211,15 @@ public class ShotController : MonoBehaviour
 
 	public void TouchBegin(Vector3 position)
 	{
+		// Reset touch variables 
 		_touchStartTime = Time.time;
 		_touchStartPosition = _touchPreviousPosition = _touchCurrentPosition = position;
 
-		curvePoints = new List<Vector3>();
-		curvePeakPoint = _touchStartPosition;
-		curveTriangleLength = 0.0f;
-		curveAngle = 0.0f;
+		// Reset curve (line) variables 
+		_curvePoints = new List<Vector3>();
+		_curvePeakPoint = _touchStartPosition;
+		_curveTriangleLength = 0.0f;
+		_curveAngle = 0.0f;
 
 		// Create a rect area to keep record of the touch input area
 		_circlingBox = new Rect(_touchStartPosition.x, _touchStartPosition.y, 0f, 0f);
@@ -231,20 +249,6 @@ public class ShotController : MonoBehaviour
 		CalculateCurve();
 	}
 
-	public MouseDirection previousMouseDirection;
-	public enum MouseDirection // line/curve direction
-	{
-		None,
-		Straight,
-		Left,
-		Right
-	}
-
-	public List<Vector3> curvePoints = new List<Vector3>();
-	public Vector3 curvePeakPoint = Vector3.zero; // last touch point before changing direction
-	public float curveTriangleLength = 0.0f;
-	public float curveAngle = 0.0f;
-
 	/// <summary>
 	/// Calculates if the touch movement is clockwise or counter clockwise,
 	/// to decide start of a new curve in different direction,
@@ -258,39 +262,39 @@ public class ShotController : MonoBehaviour
 		Vector2 a = _circlingBox.center; // Center of the touch input area
 		int moveDirectionValue = (int)((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x));
 
-		MouseDirection mouseDirection = MouseDirection.Straight;
+		TouchDirection mouseDirection = TouchDirection.Straight;
 
-		if (moveDirectionValue > 0) mouseDirection = MouseDirection.Left; // counterclock wise
-		else if (moveDirectionValue < 0) mouseDirection = MouseDirection.Right; // clock wise
-		else mouseDirection = MouseDirection.Straight; // straight or not moving
+		if (moveDirectionValue > 0) mouseDirection = TouchDirection.Left; // counterclock wise
+		else if (moveDirectionValue < 0) mouseDirection = TouchDirection.Right; // clock wise
+		else mouseDirection = TouchDirection.Straight; // straight or not moving
 
-		if (previousMouseDirection == MouseDirection.None)
+		if (_previousTouchDirection == TouchDirection.None)
 		{
-			previousMouseDirection = mouseDirection;
-			curvePoints.Add(_touchCurrentPosition);
+			_previousTouchDirection = mouseDirection;
+			_curvePoints.Add(_touchCurrentPosition);
 			return;
 		}
 
 		// Change of direction, next curve starts
-		if ((mouseDirection != MouseDirection.Straight) && (mouseDirection != previousMouseDirection))
+		if ((mouseDirection != TouchDirection.Straight) && (mouseDirection != _previousTouchDirection))
 		{
 			UpdateCurveDetails();
 
-			previousMouseDirection = mouseDirection;
+			_previousTouchDirection = mouseDirection;
 
 			// NOTE: This can be the intersection point of previous curve and line formed by brevious curve start point and current curve end position
-			curvePoints.Add(curvePeakPoint); // New curve start position
+			_curvePoints.Add(_curvePeakPoint); // New curve start position
 
-			curvePoints.Add(_touchPreviousPosition);
+			_curvePoints.Add(_touchPreviousPosition);
 			//CurvePoints.Add(mouseCurrentPosition); 
 		}
 		// Start of first curve
-		else if (previousMouseDirection == MouseDirection.None)
+		else if (_previousTouchDirection == TouchDirection.None)
 		{
-			previousMouseDirection = mouseDirection;
+			_previousTouchDirection = mouseDirection;
 		}
 
-		curvePoints.Add(_touchCurrentPosition);
+		_curvePoints.Add(_touchCurrentPosition);
 	}
 
 	/// <summary>
@@ -301,18 +305,18 @@ public class ShotController : MonoBehaviour
 		Vector3 currentCurvePeakPoint = Vector3.zero;
 		float currentCurveTriangleLength = 0.0f;
 		float currentCurveAngle = 0.0f;
-		Mathematics.GetCurveDetails(curvePoints, out currentCurvePeakPoint, out currentCurveTriangleLength, out currentCurveAngle);
+		Mathematics.GetCurveDetails(_curvePoints, out currentCurvePeakPoint, out currentCurveTriangleLength, out currentCurveAngle);
 
 		// TODO: Comparison can be based on curve size/length or curve angle. For now considering size.
-		if (currentCurveTriangleLength >= curveTriangleLength)
+		if (currentCurveTriangleLength >= _curveTriangleLength)
 		{
-			curvePeakPoint = currentCurvePeakPoint;
-			curveTriangleLength = currentCurveTriangleLength;
-			curveAngle = currentCurveAngle;
+			_curvePeakPoint = currentCurvePeakPoint;
+			_curveTriangleLength = currentCurveTriangleLength;
+			_curveAngle = currentCurveAngle;
 		}
 
 		// Remove existing curve
-		curvePoints.Clear();
+		_curvePoints.Clear();
 	}
 
 	public void TouchEnd(Vector3 position)
@@ -352,12 +356,9 @@ public class ShotController : MonoBehaviour
 			//if (shootTarget.y < 0.15f) shootTarget.y = 0.15f; // Ground rolling shot, ball can't go below ground.
 			_shotTarget.x = Math.Clamp(_shotTarget.x, -4.5f, 4.5f); // keep target near goal post.
             _shotTarget = new Vector3(_shotTarget.x, _shotTarget.y, 0f);
-
-			Instantiate(dummyPrefab, _shotTarget, Quaternion.identity);
 			_shootDistance = Vector3.Distance(_ball.transform.position, _shotTarget);
 
 			StartCoroutine(ExecuteShot()); // Execute the Shot
-
 		}
         else
         {
@@ -523,10 +524,10 @@ public class ShotController : MonoBehaviour
 		curveValue = Mathf.Lerp(0, maxCurveValue, curveValue / 10);
 
 		// Input curve angle check, between -90 -> 90
-		curveAngle = Mathf.Clamp(curveAngle, -maxCurveAngle, maxCurveAngle);
+		_curveAngle = Mathf.Clamp(_curveAngle, -maxCurveAngle, maxCurveAngle);
 
 		// Evaluate curve/swing force (with +/- direction) based on curveAngle 
-		float force = (curveValue * curveAngle / maxCurveAngle);
+		float force = (curveValue * _curveAngle / maxCurveAngle);
 
         return force;
 	}

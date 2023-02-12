@@ -46,7 +46,7 @@ public class GameManager : MonoBehaviour
         GameDataManager.LoadGameData(()=> InitializeGame());
     }
 
-    public void InitializeGame()
+    private void InitializeGame()
     {
         OnGameInitialization?.Invoke();
     }

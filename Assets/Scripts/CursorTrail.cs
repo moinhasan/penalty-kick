@@ -3,12 +3,12 @@ using System.Collections.Generic;
 
 public class CursorTrail : MonoBehaviour
 {
-    [SerializeField] LineRenderer trailPrefab = null;
-    [SerializeField] Camera Cam; 
-    [SerializeField] float distanceFromCamera = 1;
+    [SerializeField] private LineRenderer _trailPrefab = null;
+    [SerializeField] private Camera _trailCamera; 
+    [SerializeField] private float _distanceFromCamera = 35;
     
-    private LineRenderer currentTrail;
-    private List<Vector3> points = new List<Vector3>();
+    private LineRenderer _currentTrail;
+    private List<Vector3> _points = new List<Vector3>();
  
     private void Update()
     {
@@ -40,35 +40,35 @@ public class CursorTrail : MonoBehaviour
  
     private void DestroyCurrentTrail()
     {
-        if (currentTrail != null)
+        if (_currentTrail != null)
         {
-            Destroy(currentTrail.gameObject);
-            currentTrail = null;
-            points.Clear();
+            Destroy(_currentTrail.gameObject);
+            _currentTrail = null;
+            _points.Clear();
         }
     }
 
     private void CreateCurrentTrail()
     {
-        currentTrail = Instantiate(trailPrefab);
-        currentTrail.transform.SetParent(transform, true);
+        _currentTrail = Instantiate(_trailPrefab);
+        _currentTrail.transform.SetParent(transform, true);
     }
 
     private void AddPoint()
     {
-        if (currentTrail != null)
+        if (_currentTrail != null)
         {
             Vector3 mousePosition = Input.mousePosition;
-            points.Add(Cam.ViewportToWorldPoint(new Vector3(mousePosition.x / Screen.width, mousePosition.y / Screen.height, distanceFromCamera)));
+            _points.Add(_trailCamera.ViewportToWorldPoint(new Vector3(mousePosition.x / Screen.width, mousePosition.y / Screen.height, _distanceFromCamera)));
         }
     }
  
     private void UpdateTrailPoints()
     {
-        if (currentTrail != null && points.Count > 1)
+        if (_currentTrail != null && _points.Count > 1)
         {
-            currentTrail.positionCount = points.Count;
-            currentTrail.SetPositions(points.ToArray());
+            _currentTrail.positionCount = _points.Count;
+            _currentTrail.SetPositions(_points.ToArray());
         }
         else
         {

@@ -8,15 +8,15 @@ using UnityEngine.UI;
 [CreateAssetMenu(menuName = "UIAnimation/ Turn Rotate", fileName = "TurnRotateAnim")]
 public class TurnRotateAnimationUI : AnimationUIBase
 {
-    [SerializeField] private float angle = -30f;
-    [SerializeField] private int loop = 1;
+    [SerializeField] private float _angle = -30f;
+    [SerializeField] private int _loop = 1;
 
     public override void Animate(GameObject gameObj, float duration, Action onCompleteEvent = null)
     {
         var sequence = DOTween.Sequence();
         
-        Tween tween = gameObj.transform.DORotate(Vector3.forward * angle, duration/2f)
-            .SetLoops(loop, LoopType.Yoyo);
+        Tween tween = gameObj.transform.DORotate(Vector3.forward * _angle, duration/2f)
+            .SetLoops(_loop, LoopType.Yoyo);
         
         sequence.Append(tween);
         sequence.OnComplete(() =>

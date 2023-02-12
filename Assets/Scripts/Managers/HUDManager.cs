@@ -5,106 +5,78 @@ using TMPro;
 using UnityEngine;
 using DG.Tweening;
 
-public delegate void GoalSuccessEvent();
-
+/// <summary>
+/// Manages the HUD elements 
+/// </summary>
 public class HUDManager : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI scoreText;
-    [SerializeField] private TextMeshProUGUI speedText;
-    [SerializeField] private GameObject goalBanner;
+    [SerializeField] private TextMeshProUGUI _scoreText;
+    [SerializeField] private TextMeshProUGUI _speedText;
+    [SerializeField] private GameObject _goalBanner;
 
-    private int score;
-    private int hit;
-    private int miss;
-
-    private static HUDManager instance = null;
-    public static HUDManager Instance
-    {
-        get
-        {
-            return instance;
-        }
-    }
+    private int _score;
 
     void Awake()
     {
         GameManager.OnGameRestart += Reset;
-        GameManager.OnShotUpdate += OnShotStateUpdate;
+        GameManager.OnShotUpdate += OnShotUpdate;
 
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else
-        {
-             Destroy(gameObject);
-        }
-
-        goalBanner.transform.localScale = Vector3.zero;
-        speedText.text = "";
+        _goalBanner.transform.localScale = Vector3.zero;
+        _speedText.text = "";
     }
 
-    private void OnShotStateUpdate(Shot shot)
+    private void OnShotUpdate(Shot shot)
     {
         // When shot starts
         if (shot.CurrentState == Shot.State.Start)
         {
-            speedText.text = string.Format("{0} km/h", Mathf.RoundToInt(shot.Speed * 3.6f)); // m/s -> km/h
+            _speedText.text = string.Format("{0} km/h", Mathf.RoundToInt(shot.Speed * 3.6f)); // m/s -> km/h
         }
         else if (shot.CurrentState == Shot.State.Ready)
         {
-            speedText.text = "";
+            _speedText.text = "";
         }
 
         if (shot.CurrentState == Shot.State.Result)
         {
-            if (shot.IsSuccess)
+            if (shot.IsSuccess) // if goal scored
             {
-                GoalBannerAnimation();
-                IncreaseScore(shot.Score);
+                GoalBannerAnimation(); // Flash Goal text
+                IncreaseScore(shot.Score); 
             }
         }
-    }
-
-    public void GoalSuccess() {
-
-    }
-
-    public void TargetHitSuccess()
-    {
-
     }
 
     private void Reset()
     {
         // Reset Speed meter
-        speedText.text = "";
+        _speedText.text = "";
 
         // Reset Score
-        score = 0;
+        _score = 0;
         UpdateScoreDisplay();
 
         // Reset Goal banner
         tween.Kill();
-        goalBanner.transform.localScale = Vector3.zero;
+        _goalBanner.transform.localScale = Vector3.zero;
     }
 
     private void IncreaseScore(int amount)
     {
-        score += amount;
+        _score += amount;
         UpdateScoreDisplay();
     }
 
     private void UpdateScoreDisplay()
     {
-        scoreText.text = string.Format("SCORE: {0}", score);
+        _scoreText.text = string.Format("SCORE: {0}", _score);
     }
 
     Tweener tween;
     private void GoalBannerAnimation(Action OnCompleteAnim = null)
     {
-        tween = goalBanner.transform.DOScale(1f, 2f).SetEase(Ease.OutElastic).SetUpdate(true).OnComplete(() => {
-            goalBanner.transform.DOScale(0f, 1f).SetEase(Ease.InElastic).SetUpdate(true);
+        tween = _goalBanner.transform.DOScale(1f, 2f).SetEase(Ease.OutElastic).SetUpdate(true).OnComplete(() => {
+            _goalBanner.transform.DOScale(0f, 1f).SetEase(Ease.InElastic).SetUpdate(true);
         });
     }
 }

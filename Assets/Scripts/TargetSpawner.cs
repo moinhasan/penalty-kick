@@ -4,12 +4,10 @@ using UnityEngine;
 
 public class TargetSpawner : MonoBehaviour
 {
-    [SerializeField] private GameObject targetObject; // Reference of the Target object
-    private float minDistance = 1.0f; // Minimum distance between Target objects
-    private int minTargetCount = 3;
-    private int maxTargetCount = 5;
-    private List<Vector3> targetPositions;
-    private List<GameObject> targets;
+    [SerializeField] private GameObject _targetObject; // Reference of the Target object
+    private float _minDistance = 1.0f; // Minimum distance between Target objects
+    private List<Vector3> _targetPositions;
+    private List<GameObject> _targets;
 
     void Awake()
     {
@@ -21,7 +19,7 @@ public class TargetSpawner : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        targets = new List<GameObject>(); // Target object list
+        _targets = new List<GameObject>(); // Target object list
     }
 
     // Spawn Targets on Game Start
@@ -54,13 +52,13 @@ public class TargetSpawner : MonoBehaviour
         // Now restrict the max number of targets that can be placed inside the goal post.
         targetCount = Mathf.Clamp(targetCount, 0, 8);
 
-        targetPositions = GetTargetPositions(targetCount);
-        foreach(Vector3 targetPosition in targetPositions)
+        _targetPositions = GetTargetPositions(targetCount);
+        foreach(Vector3 targetPosition in _targetPositions)
         {
-            GameObject target = Instantiate(targetObject, gameObject.transform, true);
+            GameObject target = Instantiate(_targetObject, gameObject.transform, true);
             target.transform.position = targetPosition;
             target.GetComponent<TargetHitTrigger>().SetPoints(Random.Range(GameDataManager.Level.minTargetPoints, GameDataManager.Level.maxTargetPoints+1));
-            targets.Add(target);
+            _targets.Add(target);
         }
     }
 
@@ -69,12 +67,12 @@ public class TargetSpawner : MonoBehaviour
     /// </summary>
     void ClearTargets()
     {
-        foreach (GameObject target in targets)
+        foreach (GameObject target in _targets)
         {
             Destroy(target);
         }
-        targets.Clear();
-        targetPositions.Clear();
+        _targets.Clear();
+        _targetPositions.Clear();
     }
 
     /// <summary>
@@ -105,14 +103,14 @@ public class TargetSpawner : MonoBehaviour
                 // Get a random position from the area
                 float x = Random.Range(CornerVertexPositions[1].x + 0.5f, CornerVertexPositions[2].x - 0.5f); // Keep .5 Distance from the bar
                 float y = Random.Range(CornerVertexPositions[1].y + 0.5f, CornerVertexPositions[2].y - 0.5f); // Keep .5 Distance from the bar and ground
-                position = new Vector3(x, y, -0.2f); // Place a bit ahead of goal 
+                position = new Vector3(x, y, 0.0f); // Place on the goal line
 
                 // Check if position is valid. 
                 isValidPosition = true;
                 for (int j = 0; j < i; j++)
                 {
                     // Check if the position is at least distance away from the other points.
-                    if (Vector3.Distance(position, positions[j]) < minDistance)
+                    if (Vector3.Distance(position, positions[j]) < _minDistance)
                     {
                         isValidPosition = false;
                         break;
